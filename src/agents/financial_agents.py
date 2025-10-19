@@ -12,11 +12,13 @@ try:
     from ..workflows.state import FinancialAgentState
     from ..tools.stock_tools import StockDataTool, FinancialNewsTool
     from ..tools.calculator_tool import CalculatorTool
+    from ..utils.data_normalizer import DataNormalizer
 except ImportError:
     # 테스트 환경에서 절대 import 사용
     from src.workflows.state import FinancialAgentState
     from src.tools.stock_tools import StockDataTool, FinancialNewsTool
     from src.tools.calculator_tool import CalculatorTool
+    from src.utils.data_normalizer import DataNormalizer
 
 logger = logging.getLogger(__name__)
 
@@ -101,22 +103,53 @@ class ResearchAgent(FinancialAgent):
         })
         
         # 주식 데이터 수집
+        logger.info({
+            "agent": "ResearchAgent",
+            "action": "fetching_stock_data",
+            "symbol": stock_symbol
+        })
+        
         stock_result = self.stock_tool.run(stock_symbol)
         tool_history.append({
             "tool": "stock_data_tool",
             "input": {"symbol": stock_symbol},
-            "output": stock_result
+            "output": stock_result,
+            "timestamp": stock_result.get("timestamp", "")
         })
         
         if stock_result.get("status") == "success":
-            state["stock_data"] = stock_result
+            # 데이터 정규화 및 요약
+            normalized_stock = DataNormalizer.normalize_stock_data(stock_result)
+            state["stock_data"] = normalized_stock
+            
+            # 구조적 로깅
+            logger.info({
+                "agent": "ResearchAgent",
+                "action": "stock_data_collected",
+                "symbol": stock_symbol,
+                "price": normalized_stock.get("price_summary", {}).get("current"),
+                "trend": normalized_stock.get("price_summary", {}).get("trend"),
+                "pe_evaluation": normalized_stock.get("valuation_summary", {}).get("pe_evaluation"),
+                "status": "success"
+            })
+            
+            price_summary = normalized_stock.get("price_summary", {})
             messages.append({
                 "role": "assistant",
-                "content": f"주식 데이터 수집 완료: {stock_symbol}의 현재 가격은 ${stock_result.get('current_price', 'N/A')}입니다."
+                "content": f"주식 데이터 수집 완료: {stock_symbol}의 현재 가격은 ${price_summary.get('current', 'N/A')} ({price_summary.get('trend_emoji', '')} {price_summary.get('trend', '')})"
             })
         else:
             error_msg = f"주식 데이터 수집 실패: {stock_result.get('error', 'Unknown error')}"
             errors.append(error_msg)
+            
+            logger.error({
+                "agent": "ResearchAgent",
+                "action": "stock_data_failed",
+                "symbol": stock_symbol,
+                "error": stock_result.get('error', 'Unknown error'),
+                "status": "error"
+            })
+            
             messages.append({
                 "role": "assistant",
                 "content": error_msg
@@ -124,22 +157,54 @@ class ResearchAgent(FinancialAgent):
         
         # 뉴스 데이터 수집
         news_query = f"{stock_symbol} stock news"
+        
+        logger.info({
+            "agent": "ResearchAgent",
+            "action": "fetching_news",
+            "query": news_query
+        })
+        
         news_result = self.news_tool.run(news_query, max_results=3)
         tool_history.append({
             "tool": "financial_news_tool",
             "input": {"query": news_query, "max_results": 3},
-            "output": news_result
+            "output": news_result,
+            "timestamp": news_result.get("timestamp", "")
         })
         
         if news_result.get("status") == "success":
-            state["news_data"] = news_result.get("results", [])
+            # 뉴스 데이터 정규화 및 요약
+            normalized_news = DataNormalizer.normalize_news_data(news_result)
+            state["news_data"] = normalized_news
+            
+            # 구조적 로깅
+            news_overview = normalized_news.get("news_overview", {})
+            logger.info({
+                "agent": "ResearchAgent",
+                "action": "news_collected",
+                "query": news_query,
+                "total_count": news_overview.get("total_count", 0),
+                "sentiment": news_overview.get("overall_sentiment", "unknown"),
+                "sentiment_breakdown": news_overview.get("sentiment_breakdown", {}),
+                "status": "success"
+            })
+            
             messages.append({
                 "role": "assistant",
-                "content": f"{len(news_result.get('results', []))}개의 관련 뉴스를 찾았습니다."
+                "content": f"{news_overview.get('processed_count', 0)}개의 관련 뉴스를 찾았습니다. (전체 감성: {news_overview.get('overall_emoji', '')} {news_overview.get('overall_sentiment', 'N/A')})"
             })
         else:
             error_msg = f"뉴스 수집 실패: {news_result.get('error', 'Unknown error')}"
             errors.append(error_msg)
+            
+            logger.error({
+                "agent": "ResearchAgent",
+                "action": "news_failed",
+                "query": news_query,
+                "error": news_result.get('error', 'Unknown error'),
+                "status": "error"
+            })
+            
             messages.append({
                 "role": "assistant",
                 "content": error_msg

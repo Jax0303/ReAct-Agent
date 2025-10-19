@@ -19,7 +19,7 @@ class TestGraphFlow:
         """테스트 설정"""
         # 테스트용 API 키 (실제 사용을 위해서는 유효한 키 필요)
         self.workflow = FinancialWorkflow(
-            openai_api_key="test_key",
+            google_ai_api_key="test_key",
             tavily_api_key="test_key"
         )
     

@@ -18,7 +18,7 @@ class TestEndToEnd:
     def setup_method(self):
         """테스트 설정"""
         self.workflow = FinancialWorkflow(
-            openai_api_key="test_key",
+            google_ai_api_key="test_key",
             tavily_api_key="test_key"
         )
     
