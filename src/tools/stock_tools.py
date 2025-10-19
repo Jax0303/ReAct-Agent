@@ -56,10 +56,19 @@ class StockDataTool:
                 ticker = yf.Ticker(symbol)
                 info = ticker.info
                 
+                # 유효하지 않은 심볼 체크
+                if not info or len(info) <= 2:  # 빈 결과 또는 기본 정보만 있는 경우
+                    raise ValueError(f"심볼 '{symbol}'에 대한 데이터를 찾을 수 없습니다.")
+                
+                # 현재 가격이 없으면 유효하지 않은 것으로 간주
+                current_price = info.get("currentPrice")
+                if current_price is None:
+                    raise ValueError(f"심볼 '{symbol}'의 현재 가격 정보를 가져올 수 없습니다.")
+                
                 # 주요 데이터 추출
                 stock_data = {
                     "symbol": symbol,
-                    "current_price": info.get("currentPrice", "N/A"),
+                    "current_price": current_price,
                     "change": info.get("regularMarketChange", "N/A"),
                     "change_percent": info.get("regularMarketChangePercent", "N/A"),
                     "volume": info.get("volume", "N/A"),

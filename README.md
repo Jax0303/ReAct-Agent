@@ -1,6 +1,6 @@
 # 금융 ReAct 에이전트 (Financial ReAct Agent)
 
-LangGraph를 활용한 멀티 에이전트 금융 분석 시스템입니다. 주식 데이터 수집, 뉴스 분석, 투자 추천까지 전체 투자 분석 파이프라인을 자동화합니다.
+**Google Gemini 2.0 Flash**를 활용한 멀티 에이전트 금융 분석 시스템입니다. 주식 데이터 수집, 뉴스 분석, 투자 추천까지 전체 투자 분석 파이프라인을 자동화합니다.
 
 ## 📋 프로젝트 개요
 
@@ -29,7 +29,7 @@ LangGraph를 활용한 멀티 에이전트 금융 분석 시스템입니다. 주
 
 ### 전제 조건
 - Python 3.8+
-- OpenAI API 키
+- **Google AI Studio API 키** (Gemini 2.0 Flash 사용)
 - Tavily API 키 (뉴스 검색용, 선택사항)
 
 ### 설치 과정
@@ -59,9 +59,15 @@ cp .env.example .env
 
 `.env` 파일 예시:
 ```env
-OPENAI_API_KEY=your_openai_api_key_here
+GOOGLE_AI_API_KEY=your_google_ai_api_key_here
 TAVILY_API_KEY=your_tavily_api_key_here
 ```
+
+**Google AI Studio API 키 발급:**
+1. [Google AI Studio](https://aistudio.google.com/app/apikey) 방문
+2. "Get API Key" 클릭
+3. 프로젝트 선택 또는 새 프로젝트 생성
+4. API 키 복사하여 `.env` 파일에 설정
 
 ### 실행 방법
 
@@ -80,8 +86,8 @@ python examples/run_example.py --interactive
 from src.workflows.financial_workflow import FinancialWorkflow
 
 workflow = FinancialWorkflow(
-    openai_api_key="your_key",
-    tavily_api_key="your_key"
+    google_ai_api_key="your_google_ai_key",
+    tavily_api_key="your_tavily_key"
 )
 
 result = workflow.run({
@@ -186,14 +192,19 @@ ReAct-Agent/
 - **확장성**: 새로운 에이전트 추가 용이
 - **유지보수**: 각 에이전트의 독립적 개발 및 테스트 가능
 
-### 도구 선택
+### LLM 및 도구 선택
+- **LLM**: Google Gemini 2.0 Flash
+  - 무료 할당량 충분 (OpenAI 대비)
+  - 뛰어난 분석 품질
+  - 빠른 응답 속도
+  - Forward P/E, P/B, D/E 등 심화 재무 지표 분석
 - **StockDataTool**: yfinance - 무료, 실시간 가격 데이터
 - **NewsTool**: Tavily - 고품질 뉴스 검색 API
 - **CalculatorTool**: 안전한 수학 계산
 
 ## ⚠️ 제한사항
 
-1. **API 의존성**: 외부 API 서비스에 의존 (OpenAI, Tavily, yfinance)
+1. **API 의존성**: 외부 API 서비스에 의존 (Google Gemini, Tavily, yfinance)
 2. **실시간성**: 데이터 수집의 지연 가능성
 3. **언어 지원**: 주로 한국어/영어 지원
 4. **단일 종목**: 포트폴리오 분석 미지원

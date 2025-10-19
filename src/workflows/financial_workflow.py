@@ -6,8 +6,13 @@ import logging
 from typing import Dict, Any
 from langgraph.graph import StateGraph, END
 
-from .state import FinancialAgentState
-from ..agents.financial_agents import ResearchAgent, AnalysisAgent, RecommendationAgent, ReviewAgent
+try:
+    from .state import FinancialAgentState
+    from ..agents.financial_agents import ResearchAgent, AnalysisAgent, RecommendationAgent, ReviewAgent
+except ImportError:
+    # 테스트 환경에서 절대 import 사용
+    from src.workflows.state import FinancialAgentState
+    from src.agents.financial_agents import ResearchAgent, AnalysisAgent, RecommendationAgent, ReviewAgent
 
 logger = logging.getLogger(__name__)
 
@@ -15,15 +20,15 @@ logger = logging.getLogger(__name__)
 class FinancialWorkflow:
     """금융 ReAct 에이전트 워크플로우"""
     
-    def __init__(self, openai_api_key: str, tavily_api_key: str = None):
-        self.openai_api_key = openai_api_key
+    def __init__(self, google_ai_api_key: str, tavily_api_key: str = None):
+        self.google_ai_api_key = google_ai_api_key
         self.tavily_api_key = tavily_api_key
         
         # 에이전트 초기화
-        self.research_agent = ResearchAgent(openai_api_key, tavily_api_key)
-        self.analysis_agent = AnalysisAgent(openai_api_key, tavily_api_key)
-        self.recommendation_agent = RecommendationAgent(openai_api_key, tavily_api_key)
-        self.review_agent = ReviewAgent(openai_api_key, tavily_api_key)
+        self.research_agent = ResearchAgent(google_ai_api_key, tavily_api_key)
+        self.analysis_agent = AnalysisAgent(google_ai_api_key, tavily_api_key)
+        self.recommendation_agent = RecommendationAgent(google_ai_api_key, tavily_api_key)
+        self.review_agent = ReviewAgent(google_ai_api_key, tavily_api_key)
         
         # 워크플로우 빌드
         self.app = self._build_workflow()
