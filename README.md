@@ -80,6 +80,7 @@ TAVILY_API_KEY=your_tavily_api_key_here
 #### 1. 메인 실행 파일 (대화형 모드)
 ```bash
 python src/main.py
+<img width="674" height="648" alt="스크린샷 2025-10-20 022103" src="https://github.com/user-attachments/assets/4ce74d23-c482-4d95-81db-90a19b9b99f9" />
 ```
 
 #### 2. 특정 주식 분석 (명령줄)
@@ -90,6 +91,7 @@ python src/main.py AAPL
 #### 3. 스트리밍 모드 (실시간 로그)
 ```bash
 python src/main.py AAPL stream
+<img width="862" height="175" alt="스크린샷 2025-10-20 022201" src="https://github.com/user-attachments/assets/50f72c85-f43d-4bc6-a78c-0419d4091038" />
 ```
 
 #### 4. 예제 스크립트
@@ -130,6 +132,7 @@ for event in workflow.stream({
 ```bash
 export AUTO_APPROVE=true
 python src/main.py AAPL
+<img width="434" height="494" alt="image" src="https://github.com/user-attachments/assets/163af618-337b-4289-b384-7b1fe042e7bc" />
 ```
 
 ## 📖 사용 예시
